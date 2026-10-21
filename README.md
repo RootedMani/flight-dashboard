@@ -85,7 +85,7 @@ Then open **http://127.0.0.1:8050** in your browser. Press `Ctrl+C` in the termi
    - Saturdays have about 23% fewer flights than an average weekday.
    - Saturday is also the only day when flights arrive early on average (−1.4 min).
    - Thursday is the worst day (+11.7 min).
-5. **Weather shows up clearly.** On 8 February 2013, during the "Nemo" blizzard, **50.8% of flights were cancelled**. You can see the dip in the "flights per day" chart.
+5. **One bad day can be extreme.** On 8 February 2013, the day of a big snowstorm (the media called it "Nemo"), **50.8% of flights were cancelled**, compared with 2.5% over the whole year. To see it, set the date range to just that day and look at the "Cancelled flights" card. The "flights per day" chart does *not* show a dip, because it counts scheduled flights, including cancelled ones.
 
 ## How the numbers were checked
 
