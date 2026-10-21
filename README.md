@@ -6,6 +6,9 @@ three airports (JFK, LaGuardia and Newark) during 2013.
 
 Midterm project, Allameh Helli 7 high school, Tehran.
 
+🌐 **Live dashboard:** https://flight-dashboard-js16.onrender.com/
+(free hosting: if nobody has visited for 15 minutes, the first visit takes about a minute to wake up)
+
 📄 A Persian technical document explaining how the project was built: [docs/technical-doc-fa.pdf](docs/technical-doc-fa.pdf)
 
 ![Screenshot of the dashboard](docs/dashboard.png)
@@ -60,7 +63,7 @@ The dashboard can run online for free on [Render](https://render.com):
 
 1. Sign in to render.com with your GitHub account.
 2. Click **New → Blueprint**, choose this repository, and click **Apply**. Render reads `render.yaml` and builds the app from the `Dockerfile`. This takes a few minutes.
-3. Open the `https://….onrender.com` address that Render shows.
+3. Open the `https://….onrender.com` address that Render shows. This project's address is https://flight-dashboard-js16.onrender.com/
 
 On the free plan the app goes to sleep after 15 minutes without visitors. The first visit after that takes about a minute while it wakes up. Every `git push` redeploys the app automatically.
 
