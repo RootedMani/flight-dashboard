@@ -1,0 +1,6 @@
+# Libraries this project needs. Install with:  pip install -r requirements.txt
+# Versions are pinned so the project works the same on every computer.
+dash==4.4.1        # the web dashboard framework
+plotly==7.1.0      # interactive charts (Dash draws its charts with Plotly)
+pandas==3.0.6      # loading, cleaning and summarising the table of flights
+pyarrow==26.0.0    # lets pandas read/write fast .parquet files

@@ -1,0 +1,11 @@
+# Virtual environment (each person creates their own with pip install)
+.venv/
+
+# Python's compiled cache files
+__pycache__/
+*.pyc
+
+# Large data files: too big for git, and the cleaned file can be rebuilt
+# any time by running src/data_prep.py
+data/*.csv
+data/*.parquet
