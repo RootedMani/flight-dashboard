@@ -6,6 +6,10 @@ three airports (JFK, LaGuardia and Newark) during 2013.
 
 Midterm project, Allameh Helli 7 high school, Tehran.
 
+📄 A Persian technical document explaining how the project was built: [docs/technical-doc-fa.pdf](docs/technical-doc-fa.pdf)
+
+![Screenshot of the dashboard](docs/dashboard.png)
+
 ## What the dashboard shows
 
 - **Filters:** date range, destination(s) and airline(s). Every card and chart updates when you change them.
@@ -31,19 +35,21 @@ source .venv/bin/activate        # Linux / macOS
 pip install -r requirements.txt
 ```
 
-Put the raw data file at `data/flights.csv`. It is not stored in git because it is too large (43 MB).
+The cleaned data (`data/clean_flights.parquet`, 11 MB) is included in the repo, so the dashboard runs right after installing.
+
+The raw `data/flights.csv` (43 MB) is **not** in git, because it is too large. You only need it to rebuild the cleaned file (`data_prep.py`) or to run the checks (`check_numbers.py`). Put it at `data/flights.csv`.
 
 ## How to run
 
 ```bash
-# Step 1: clean the data (only needed once; creates data/clean_flights.parquet)
-python src/data_prep.py
+# Start the dashboard (uses the included data/clean_flights.parquet)
+python src/app.py
 
-# Step 2 (optional): print the analysis report in the terminal
+# Optional: print the analysis report in the terminal
 python src/analysis.py
 
-# Step 3: start the dashboard
-python src/app.py
+# Optional, needs data/flights.csv: rebuild the cleaned data from the raw CSV
+python src/data_prep.py
 ```
 
 Then open **http://127.0.0.1:8050** in your browser. Press `Ctrl+C` in the terminal to stop the app.
@@ -53,12 +59,13 @@ Then open **http://127.0.0.1:8050** in your browser. Press `Ctrl+C` in the termi
 | File | What it does |
 |---|---|
 | `data/flights.csv` | The original data. It is never changed. |
-| `data/clean_flights.parquet` | The cleaned data made by `data_prep.py`. Parquet is a compressed format: 11 MB instead of 43 MB, and it loads in about 0.06 s. |
+| `data/clean_flights.parquet` | The cleaned data made by `data_prep.py` (included in the repo). Parquet is a compressed format: 11 MB instead of 43 MB, and it loads in about 0.06 s. |
 | `src/data_prep.py` | Cleans the data: flags cancelled/diverted flights, handles missing values, builds real date/time columns, and adds day of week and delay category. Prints a report of what changed. |
 | `src/analysis.py` | Small functions that each answer one question (flights per month, delay distribution, airline comparison, top destinations). Prints the key findings. The dashboard reuses these functions. |
 | `src/app.py` | The Dash dashboard: the page layout, the filters, and one callback that filters the data and redraws everything. |
 | `src/check_numbers.py` | Checks that the dashboard's KPI numbers match numbers calculated directly from the raw CSV. Prints PASS/FAIL. |
 | `src/assets/style.css` | The dark theme. Dash loads every CSS file in `assets/` automatically. |
+| `docs/` | The dashboard screenshot and the Persian technical document (PDF, its HTML source, and the Vazirmatn font). |
 | `requirements.txt` | The list of libraries (with exact versions) the project needs. |
 
 ## Decisions about the data

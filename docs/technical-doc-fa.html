@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>مستندات فنی داشبورد تحلیل داده‌های پرواز</title>
+<!--
+  Source of docs/technical-doc-fa.pdf.
+  To rebuild the PDF after editing this file (from the project folder):
+    google-chrome --headless --no-pdf-header-footer \
+      --print-to-pdf=docs/technical-doc-fa.pdf docs/technical-doc-fa.html
+-->
+<style>
+  /* Vazirmatn (the current version of the Vazir font), SIL Open Font License - see fonts/OFL.txt.
+     "FD" = Farsi Digits: shows every digit as a Persian digit. */
+  @font-face { font-family: "VazirFD"; src: url("fonts/Vazirmatn-FD-Regular.woff2") format("woff2"); font-weight: 400; }
+  @font-face { font-family: "VazirFD"; src: url("fonts/Vazirmatn-FD-Bold.woff2") format("woff2"); font-weight: 700; }
+  @font-face { font-family: "VazirLatin"; src: url("fonts/Vazirmatn-Regular.woff2") format("woff2"); }
+
+  @page {
+    size: A4;
+    margin: 18mm 17mm 20mm;
+    @bottom-center { content: counter(page, persian); font-family: "VazirFD"; font-size: 9pt; color: #898781; }
+  }
+  @page :first { @bottom-center { content: none; } }
+
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; box-sizing: border-box; }
+  body { margin: 0; font-family: "VazirFD", sans-serif; font-size: 10.5pt; line-height: 1.95; color: #1f1f1d; text-align: justify; }
+
+  h1, h2, h3 { line-height: 1.5; break-after: avoid; text-align: right; }
+  h2 { font-size: 16pt; color: #1c5cab; margin: 0 0 8px; padding-bottom: 6px; border-bottom: 2px solid #cde2fb; }
+  h3 { font-size: 12pt; color: #1f1f1d; margin: 18px 0 4px; }
+  p { margin: 6px 0; }
+  ul, ol { margin: 4px 0; padding-right: 22px; padding-left: 0; }
+  ol { list-style-type: persian; }
+  li { margin: 2px 0; }
+  section { break-before: page; }
+  section.continue { break-before: auto; margin-top: 26px; }
+
+  code, pre, .latin { unicode-bidi: isolate; direction: ltr; }
+  code { font-family: "DejaVu Sans Mono", monospace; font-size: 8.6pt; background: #f1f0ec; padding: 1px 5px; border-radius: 4px; }
+  .latin { font-family: "VazirLatin", sans-serif; }
+  pre {
+    font-family: "DejaVu Sans Mono", monospace; font-size: 8.4pt; line-height: 1.55;
+    text-align: left; background: #f5f4f0; border: 1px solid #e1e0d9; border-radius: 8px;
+    padding: 10px 14px; margin: 8px 0; white-space: pre-wrap; break-inside: avoid;
+  }
+  pre .c { color: #6b6a64; }
+
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9.6pt; line-height: 1.6; break-inside: avoid; }
+  th { background: #eef4fc; color: #104281; font-weight: 700; }
+  th, td { border-bottom: 1px solid #e1e0d9; padding: 5px 8px; text-align: right; vertical-align: top; }
+
+  .note { background: #f5f8fd; border-right: 4px solid #3987e5; border-radius: 6px; padding: 8px 12px; margin: 10px 0; break-inside: avoid; }
+  .warn { background: #fdf6f1; border-right-color: #d95926; }
+
+  /* Cover page */
+  .cover { height: 255mm; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+  .cover .kicker { color: #2a78d6; font-size: 12pt; font-weight: 700; letter-spacing: 0; }
+  .cover h1 { font-size: 27pt; margin: 10px 0 6px; color: #0d366b; text-align: center; }
+  .cover .sub { font-size: 13pt; color: #52514e; }
+  .cover .meta { margin-top: 42px; font-size: 11pt; color: #52514e; line-height: 2.1; }
+  .cover .bar { width: 90px; height: 4px; background: #3987e5; border-radius: 2px; margin: 26px auto; }
+
+  .toc ol { font-size: 11.5pt; line-height: 2.2; }
+
+  /* Pipeline diagram (right-to-left, like the text) */
+  .flow { display: flex; align-items: stretch; justify-content: space-between; gap: 6px; margin: 12px 0; break-inside: avoid; }
+  .flow .box { flex: 1; background: #eef4fc; border: 1px solid #b7d3f6; border-radius: 8px; padding: 8px 6px; text-align: center; font-size: 9pt; line-height: 1.6; }
+  .flow .box b { display: block; font-size: 9.6pt; color: #104281; }
+  .flow .arrow { align-self: center; color: #2a78d6; font-size: 15pt; }
+
+  figure { margin: 6px 0; text-align: center; break-inside: avoid; }
+  figure img { width: 100%; border-radius: 8px; border: 1px solid #e1e0d9; }
+  figcaption { font-size: 9pt; color: #52514e; margin-top: 4px; }
+
+  .findings li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<!-- ============================ COVER ============================ -->
+<div class="cover">
+  <div class="kicker">مستندات فنی</div>
+  <h1>داشبورد تحلیل داده‌های پرواز</h1>
+  <div class="sub">ساخته‌شده با زبان پایتون و کتابخانهٔ <span class="latin">Dash</span></div>
+  <div class="bar"></div>
+  <div class="meta">
+    پروژهٔ میان‌ترم<br>
+    دبیرستان علامه حلی ۷، تهران<br>
+    مهر ۱۴۰۵
+  </div>
+</div>
+
+<!-- ============================ TOC ============================ -->
+<section class="toc">
+  <h2>فهرست مطالب</h2>
+  <ol>
+    <li>معرفی پروژه</li>
+    <li>ساختار پروژه و ابزارها</li>
+    <li>شناخت داده‌ها</li>
+    <li>پیش‌پردازش داده‌ها</li>
+    <li>تحلیل اولیه</li>
+    <li>داشبورد تعاملی</li>
+    <li>آزمون و اطمینان از درستی اعداد</li>
+    <li>یافته‌های اصلی</li>
+    <li>نصب و اجرا</li>
+    <li>محدودیت‌ها و ایده‌های آینده</li>
+    <li>واژه‌نامه</li>
+  </ol>
+
+  <h2 style="margin-top:28px">۱. معرفی پروژه</h2>
+  <p>
+    هدف این پروژه ساختن یک <b>داشبورد تعاملی</b> برای تحلیل داده‌های پرواز است؛ صفحه‌ای در مرورگر که
+    تعداد پروازها، میزان تأخیرها، مقصدها و شرکت‌های هواپیمایی را نشان می‌دهد و کاربر می‌تواند با
+    فیلترها (بازهٔ تاریخ، مقصد و شرکت هواپیمایی) داده‌ها را بررسی کند. با هر تغییر فیلتر، همهٔ کارت‌ها و
+    نمودارها فوراً به‌روز می‌شوند.
+  </p>
+  <p>
+    داده‌ها مربوط به مجموعه‌دادهٔ شناخته‌شدهٔ <span class="latin">nycflights13</span> است: همهٔ
+    ۳۳۶٬۷۷۶ پروازی که در سال ۲۰۱۳ میلادی از سه فرودگاه شهر نیویورک (<span class="latin">JFK</span>،
+    <span class="latin">LGA</span> و <span class="latin">EWR</span>) پرواز کرده‌اند.
+  </p>
+  <p>کار در شش مرحله انجام شد:</p>
+  <ol>
+    <li>آماده‌سازی محیط (محیط مجازی، کتابخانه‌ها، ساختار پوشه‌ها و <span class="latin">git</span>)</li>
+    <li>شناخت داده‌ها (ستون‌ها، نوع داده‌ها و مقادیر گمشده)</li>
+    <li>پیش‌پردازش و پاک‌سازی داده‌ها</li>
+    <li>تحلیل اولیه و استخراج یافته‌ها</li>
+    <li>ساخت داشبورد تعاملی</li>
+    <li>آزمون، بررسی اعداد و نوشتن مستندات</li>
+  </ol>
+</section>
+
+<!-- ============================ 2 ============================ -->
+<section>
+  <h2>۲. ساختار پروژه و ابزارها</h2>
+  <h3>ابزارها و کتابخانه‌ها</h3>
+  <table>
+    <tr><th style="width:22%">کتابخانه</th><th>کاربرد در این پروژه</th></tr>
+    <tr><td><span class="latin">pandas</span></td><td>خواندن، پاک‌سازی، فیلتر کردن و خلاصه‌کردن جدول پروازها</td></tr>
+    <tr><td><span class="latin">pyarrow</span></td><td>خواندن و نوشتن سریع فایل‌های <span class="latin">Parquet</span></td></tr>
+    <tr><td><span class="latin">plotly</span></td><td>رسم نمودارهای تعاملی (با قابلیت نشان دادن جزئیات هنگام بردن ماوس روی نمودار)</td></tr>
+    <tr><td><span class="latin">dash</span></td><td>ساختن صفحهٔ وب داشبورد و به‌روزرسانی خودکار آن با تغییر فیلترها</td></tr>
+  </table>
+  <p>
+    همهٔ کتابخانه‌ها در یک <b>محیط مجازی</b> (پوشهٔ <code>.venv</code>) نصب شده‌اند و نسخهٔ دقیق
+    آن‌ها در فایل <code>requirements.txt</code> ثبت شده است تا پروژه روی هر رایانه‌ای دقیقاً به همین شکل
+    اجرا شود. برای نگهداری تاریخچهٔ تغییرات از <span class="latin">git</span> استفاده شد و هر مرحله
+    جداگانه ثبت (<span class="latin">commit</span>) شد.
+  </p>
+
+  <h3>ساختار پوشه‌ها</h3>
+<pre>flight-dashboard/
+├── data/
+│   ├── flights.csv              <span class="c"># raw data (never modified, not in git)</span>
+│   └── clean_flights.parquet    <span class="c"># cleaned data, made by data_prep.py</span>
+├── src/
+│   ├── data_prep.py             <span class="c"># stage 3: cleaning</span>
+│   ├── analysis.py              <span class="c"># stage 4: analysis functions + report</span>
+│   ├── app.py                   <span class="c"># stage 5: the Dash dashboard</span>
+│   ├── check_numbers.py         <span class="c"># stage 6: checks the numbers</span>
+│   └── assets/style.css         <span class="c"># dark theme</span>
+├── docs/                        <span class="c"># screenshot + this document</span>
+├── requirements.txt
+└── README.md</pre>
+
+  <h3>مسیر حرکت داده‌ها</h3>
+  <div class="flow">
+    <div class="box"><b>flights.csv</b>دادهٔ خام<br>۴۳ مگابایت</div>
+    <div class="arrow">←</div>
+    <div class="box"><b>data_prep.py</b>پاک‌سازی و<br>افزودن ستون‌ها</div>
+    <div class="arrow">←</div>
+    <div class="box"><b>clean_flights.parquet</b>دادهٔ تمیز<br>۱۱ مگابایت</div>
+    <div class="arrow">←</div>
+    <div class="box"><b>app.py</b>یک بار در شروع<br>بارگذاری می‌شود</div>
+    <div class="arrow">←</div>
+    <div class="box"><b>مرورگر</b>فیلترها، کارت‌ها<br>و نمودارها</div>
+  </div>
+  <p>
+    فایل <code>analysis.py</code> توابعی دارد که هم برای چاپ گزارش در ترمینال استفاده می‌شوند و هم
+    داشبورد از آن‌ها استفاده می‌کند؛ به این ترتیب اعداد گزارش و اعداد داشبورد همیشه از یک کد
+    می‌آیند و نمی‌توانند با هم تفاوت داشته باشند.
+  </p>
+</section>
+
+<!-- ============================ 3 ============================ -->
+<section>
+  <h2>۳. شناخت داده‌ها</h2>
+  <p>
+    پیش از هر کاری، فایل خام خوانده شد تا بدون هیچ فرضی دربارهٔ نام ستون‌ها، ساختار آن بررسی شود.
+    فایل ۳۳۶٬۷۷۶ ردیف و ۲۱ ستون دارد؛ هر ردیف یک پرواز است. داده‌ها فقط سال ۲۰۱۳، فقط سه فرودگاه
+    مبدأ، ۱۰۵ مقصد و ۱۶ شرکت هواپیمایی را در بر می‌گیرند.
+  </p>
+
+  <h3>ستون‌های مهم</h3>
+  <table>
+    <tr><th style="width:26%">مفهوم</th><th style="width:30%">ستون(ها)</th><th>توضیح</th></tr>
+    <tr><td>شمارهٔ پرواز</td><td><code>carrier</code> + <code>flight</code></td><td>شمارهٔ پرواز به‌تنهایی بین شرکت‌ها تکرار می‌شود؛ مثلاً <span class="latin">UA1545</span> ترکیب هر دو است.</td></tr>
+    <tr><td>مبدأ و مقصد</td><td><code>origin</code>، <code>dest</code></td><td>کد سه‌حرفی فرودگاه</td></tr>
+    <tr><td>شرکت هواپیمایی</td><td><code>carrier</code>، <code>name</code></td><td>کد دوحرفی و نام کامل شرکت</td></tr>
+    <tr><td>تاریخ</td><td><code>year</code>، <code>month</code>، <code>day</code></td><td>سال، ماه و روز پرواز</td></tr>
+    <tr><td>زمان برنامه‌ریزی‌شده و واقعی</td><td><code>sched_dep_time</code>، <code>dep_time</code> و مشابه آن برای ورود</td><td>به شکل عدد «ساعت‌دقیقه» ذخیره شده‌اند؛ مثلاً ۱۴۵۳ یعنی ساعت ۱۴:۵۳.</td></tr>
+    <tr><td>تأخیر</td><td><code>dep_delay</code>، <code>arr_delay</code></td><td>تأخیر حرکت و تأخیر رسیدن، به دقیقه؛ عدد منفی یعنی زودتر از برنامه.</td></tr>
+  </table>
+  <p>
+    ستون تأخیر از قبل وجود داشت و لازم نبود از روی زمان‌ها محاسبه شود. برای اطمینان، تأخیر حرکت
+    یک بار دیگر از روی زمان برنامه‌ریزی‌شده و زمان واقعی حساب شد و برای ۹۹٫۹۹٪ پروازها دقیقاً
+    با ستون موجود برابر بود.
+  </p>
+
+  <h3>مقادیر گمشده</h3>
+  <table>
+    <tr><th style="width:34%">ستون</th><th style="width:22%">تعداد گمشده</th><th>دلیل</th></tr>
+    <tr><td><code>dep_time</code>، <code>dep_delay</code></td><td>۸٬۲۵۵ (۲٫۴۵٪)</td><td>پروازهای <b>لغوشده</b> که هرگز حرکت نکردند</td></tr>
+    <tr><td><code>arr_time</code></td><td>۸٬۷۱۳ (۲٫۵۹٪)</td><td>پروازهای لغوشده و چند پرواز که به‌طور عادی فرود نیامدند</td></tr>
+    <tr><td><code>arr_delay</code>، <code>air_time</code></td><td>۹٬۴۳۰ (۲٫۸۰٪)</td><td>لغوشده‌ها به‌علاوهٔ ۱٬۱۷۵ پروازی که حرکت کردند ولی زمان رسیدن ندارند (احتمالاً به فرودگاه دیگری <b>تغییر مسیر</b> داده‌اند)</td></tr>
+    <tr><td><code>tailnum</code> (شمارهٔ هواپیما)</td><td>۲٬۵۱۲ (۰٫۷۵٪)</td><td>همه مربوط به پروازهای لغوشده‌اند</td></tr>
+  </table>
+  <div class="note">
+    دادهٔ خام <b>مختصات جغرافیایی</b> فرودگاه‌ها را ندارد و فقط کد آن‌ها را دارد؛ به همین دلیل برای
+    نمودار سوم به‌جای نقشه از نمودار پراکندگی استفاده شد.
+  </div>
+</section>
+
+<!-- ============================ 4 ============================ -->
+<section>
+  <h2>۴. پیش‌پردازش داده‌ها (<span class="latin">data_prep.py</span>)</h2>
+  <p>
+    این برنامه فایل خام را فقط <b>می‌خواند</b> و هرگز تغییرش نمی‌دهد. اثرانگشت (<span class="latin">checksum</span>)
+    فایل خام در ابتدا و انتهای پروژه مقایسه شد و دقیقاً یکسان بود. هیچ ردیفی حذف نمی‌شود و یک بررسی
+    ایمنی در کد، اگر تعداد ردیف‌ها تغییر کند، برنامه را متوقف می‌کند.
+  </p>
+
+  <h3>تصمیم ۱: نگه داشتن پروازهای لغوشده و تغییر مسیر داده</h3>
+  <p>
+    ۸٬۲۵۵ پرواز لغوشده و ۱٬۱۷۵ پرواز تغییر مسیر داده حذف نشدند، بلکه با دو ستون جدید
+    <code>cancelled</code> و <code>diverted</code> (درست/نادرست) علامت‌گذاری شدند. این پروازها در
+    «تعداد کل پروازها» شمرده می‌شوند، اما در میانگین تأخیر نه؛ چون تأخیر رسیدن ندارند. مزیت این کار
+    این است که می‌توانیم درصد لغو پروازها را هم نشان دهیم.
+  </p>
+
+  <h3>تصمیم ۲: پر نکردن تأخیرهای گمشده با صفر</h3>
+  <p>
+    ستون‌های زمان و تأخیر برای پروازهای لغوشده عمداً <b>خالی</b> ماندند. اگر با صفر پر می‌شدند، یعنی
+    وانمود می‌کردیم این پروازها سر وقت رسیده‌اند و میانگین تأخیر کمتر از واقعیت نشان داده می‌شد.
+    <span class="latin">pandas</span> هنگام محاسبهٔ میانگین، مقادیر خالی را خودش نادیده می‌گیرد. فقط
+    ستون <code>tailnum</code> با مقدار <code>"Unknown"</code> پر شد، چون یک برچسب متنی است و روی هیچ
+    عددی اثر نمی‌گذارد.
+  </p>
+
+  <h3>تصمیم ۳: تبدیل زمان‌های «ساعت‌دقیقه» به تاریخ و زمان واقعی</h3>
+  <p>
+    عددی مثل ۱۴۵۳ برای <span class="latin">pandas</span> فقط یک عدد است و نمی‌توان با آن محاسبهٔ زمانی
+    انجام داد. علاوه بر این، مقدار عجیب ۲۴۰۰ (نیمه‌شب) و پروازهایی که بعد از نیمه‌شب حرکت کرده‌اند،
+    تبدیل مستقیم را خراب می‌کنند. راه‌حل: زمان واقعی حرکت را به شکل «زمان برنامه‌ریزی‌شده + تأخیر»
+    ساختیم که همهٔ این حالت‌ها را خودبه‌خود درست حل می‌کند:
+  </p>
+<pre><span class="c"># Scheduled departure = date + scheduled hour + scheduled minute.</span>
+df["sched_dep_datetime"] = (
+    df["flight_date"]
+    + pd.to_timedelta(df["hour"], unit="h")
+    + pd.to_timedelta(df["minute"], unit="min")
+)
+<span class="c"># Actual departure = scheduled departure + departure delay.</span>
+df["dep_datetime"] = df["sched_dep_datetime"] + pd.to_timedelta(df["dep_delay"], unit="min")</pre>
+  <p>
+    برای زمان رسیدن، تاریخ و زمان ساخته نشد؛ چون زمان رسیدن به وقت محلی مقصد است (مثلاً لس‌آنجلس سه
+    ساعت از نیویورک عقب‌تر است) و مخلوط کردن آن با زمان نیویورک نتیجهٔ غلط می‌دهد.
+  </p>
+
+  <h3>تصمیم ۴: دسته‌بندی تأخیر</h3>
+  <p>
+    بر اساس تأخیر رسیدن (همان چیزی که مسافر حس می‌کند) و با معیار رسمی آمریکا که پرواز تا ۱۵ دقیقه
+    تأخیر را «به‌موقع» حساب می‌کند:
+  </p>
+  <table>
+    <tr><th>دسته</th><th>شرط (دقیقه)</th><th>تعداد پرواز</th><th>درصد</th></tr>
+    <tr><td>به‌موقع</td><td>۱۵ یا کمتر</td><td>۲۴۹٬۷۱۶</td><td>۷۴٫۱٪</td></tr>
+    <tr><td>تأخیر کم</td><td>۱۶ تا ۴۵</td><td>۴۰٬۵۵۶</td><td>۱۲٫۰٪</td></tr>
+    <tr><td>تأخیر متوسط</td><td>۴۶ تا ۱۲۰</td><td>۲۷٬۰۴۰</td><td>۸٫۰٪</td></tr>
+    <tr><td>تأخیر زیاد</td><td>بیش از ۱۲۰</td><td>۱۰٬۰۳۴</td><td>۳٫۰٪</td></tr>
+    <tr><td>تغییر مسیر</td><td>تأخیر رسیدن ندارد</td><td>۱٬۱۷۵</td><td>۰٫۳٪</td></tr>
+    <tr><td>لغوشده</td><td>حرکت نکرده</td><td>۸٬۲۵۵</td><td>۲٫۵٪</td></tr>
+  </table>
+<pre>DELAY_BINS = [-float("inf"), 15, 45, 120, float("inf")]
+DELAY_LABELS = ["On time", "Small delay", "Medium delay", "Large delay"]
+category = pd.cut(df["arr_delay"], bins=DELAY_BINS, labels=DELAY_LABELS)</pre>
+
+  <h3>ستون‌های کمکی دیگر و ذخیره‌سازی</h3>
+  <ul>
+    <li><code>day_of_week</code>: روز هفته، به ترتیب درست دوشنبه تا یکشنبه</li>
+    <li><code>flight_code</code>: شمارهٔ کامل پرواز، مثل <span class="latin">UA1545</span></li>
+    <li><code>is_delayed</code>: آیا پرواز بیش از ۱۵ دقیقه دیر رسیده است؟</li>
+    <li>نام ستون <code>name</code> به <code>airline</code> تغییر کرد تا معنایش روشن‌تر باشد.</li>
+  </ul>
+  <p>
+    دادهٔ تمیز در قالب <span class="latin">Parquet</span> ذخیره شد؛ قالبی فشرده و ستونی که حجم را از
+    ۴۳ به ۱۱ مگابایت کاهش داد و زمان بارگذاری را به حدود ۰٫۰۶ ثانیه رساند. همین موضوع اصلی‌ترین
+    دلیل سرعت داشبورد است.
+  </p>
+</section>
+
+<!-- ============================ 5 ============================ -->
+<section class="continue">
+  <h2>۵. تحلیل اولیه (<span class="latin">analysis.py</span>)</h2>
+  <p>
+    هر تابع در این فایل به یک پرسش پاسخ می‌دهد و یک جدول کوچک برمی‌گرداند: تعداد پرواز در هر ماه،
+    توزیع تأخیرها، مقایسهٔ شرکت‌های هواپیمایی و مقصدهای پرتردد. ابزار اصلی، <code>groupby</code> در
+    <span class="latin">pandas</span> است: ردیف‌ها بر اساس یک ستون گروه‌بندی و برای هر گروه چند عدد
+    خلاصه محاسبه می‌شود:
+  </p>
+<pre>def compare_airlines(df):
+    """Number of flights and delay numbers per airline, busiest first."""
+    airlines = df.groupby("airline", observed=True).agg(
+        flights=("id", "count"),
+        avg_arr_delay=("arr_delay", "mean"),
+        pct_delayed=("is_delayed", "mean"),
+        pct_cancelled=("cancelled", "mean"),
+    )
+    airlines["pct_delayed"] *= 100
+    airlines["pct_cancelled"] *= 100
+    return airlines.sort_values("flights", ascending=False)</pre>
+
+  <h3>چند نتیجهٔ تحلیل</h3>
+  <table>
+    <tr><th>ماه</th><th>تعداد پرواز</th><th>میانگین تأخیر رسیدن (دقیقه)</th><th>درصد پروازهای دیررس</th></tr>
+    <tr><td>ژوئیه (پرترددترین و بدترین)</td><td>۲۹٬۴۲۵</td><td>۱۶٫۷</td><td>۳۱٫۵٪</td></tr>
+    <tr><td>ژوئن</td><td>۲۸٬۲۴۳</td><td>۱۶٫۵</td><td>۳۰٫۸٪</td></tr>
+    <tr><td>دسامبر</td><td>۲۸٬۱۳۵</td><td>۱۴٫۹</td><td>۳۲٫۶٪</td></tr>
+    <tr><td>سپتامبر (بهترین)</td><td>۲۷٬۵۷۴</td><td>۴٫۰ زودتر</td><td>۱۳٫۲٪</td></tr>
+    <tr><td>فوریه (کم‌ترددترین)</td><td>۲۴٬۹۵۱</td><td>۵٫۶</td><td>۲۲٫۹٪</td></tr>
+  </table>
+  <p>
+    در میان شرکت‌های بزرگ (بیش از ۱۰۰۰ پرواز)، <span class="latin">American</span> با ۰٫۴ و
+    <span class="latin">Delta</span> با ۱٫۶ دقیقه کمترین، و <span class="latin">AirTran</span> با ۲۰٫۱ و
+    <span class="latin">ExpressJet</span> با ۱۵٫۸ دقیقه بیشترین میانگین تأخیر را دارند. شرکت‌های بسیار
+    کوچک کنار گذاشته شدند، چون با تعداد پرواز کم، یک هفتهٔ بد می‌تواند آن‌ها را بهترین یا بدترین
+    نشان دهد. پرترددترین مقصد شیکاگو (<span class="latin">ORD</span>) با ۱۷٬۲۸۳ پرواز است.
+  </p>
+</section>
+
+<!-- ============================ 6 ============================ -->
+<section>
+  <h2>۶. داشبورد تعاملی (<span class="latin">app.py</span>)</h2>
+  <figure>
+    <img src="dashboard.png" alt="تصویر داشبورد">
+    <figcaption>تصویر ۱: داشبورد بدون فیلتر (همهٔ پروازهای سال ۲۰۱۳)</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h3 style="margin-top:0">اجزای صفحه</h3>
+  <ul>
+    <li><b>فیلترها:</b> انتخاب بازهٔ تاریخ، یک یا چند مقصد و یک یا چند شرکت هواپیمایی. فیلتر خالی یعنی «همه».</li>
+    <li><b>کارت‌های شاخص (<span class="latin">KPI</span>):</b> تعداد کل پروازها، میانگین تأخیر رسیدن، درصد پروازهای دیررس و درصد پروازهای لغوشده. زیر هر عدد توضیح داده شده که بر چه پایه‌ای حساب شده است (مثلاً «از پروازهایی که رسیده‌اند»).</li>
+    <li><b>نمودار ۱:</b> تعداد پرواز در هر روز و میانگین تأخیر در هر روز، در دو قاب جداگانه با محور زمان مشترک.</li>
+    <li><b>نمودار ۲:</b> هیستوگرام (توزیع) تأخیرها با خط‌چین روی مرز ۱۵ دقیقه.</li>
+    <li><b>نمودار ۳:</b> نمودار پراکندگی؛ هر نقطه یک مقصد: تعداد پرواز در برابر میانگین تأخیر.</li>
+    <li><b>نمودار ۴:</b> مقایسهٔ شرکت‌ها: میانگین تأخیر و تعداد پرواز هر شرکت.</li>
+  </ul>
+
+  <h3>داشبورد چطور کار می‌کند؟</h3>
+  <p>
+    دادهٔ تمیز <b>فقط یک بار</b> و هنگام شروع برنامه بارگذاری می‌شود. سپس یک <b>کال‌بک</b>
+    (<span class="latin">callback</span>) تعریف شده است: تابعی که <span class="latin">Dash</span> هر بار
+    که یکی از فیلترها تغییر کند، به‌طور خودکار اجرا می‌کند. این تابع جدول را فیلتر می‌کند، اعداد و
+    نمودارها را دوباره می‌سازد و به صفحه برمی‌گرداند:
+  </p>
+<pre>@app.callback(
+    Output("kpi-flights", "children"),
+    ...                                   <span class="c"># 4 cards + 4 charts</span>
+    Input("date-range", "start_date"),
+    Input("date-range", "end_date"),
+    Input("dest-filter", "value"),
+    Input("airline-filter", "value"),
+)
+def update_dashboard(start_date, end_date, destinations, airlines):
+    filtered = filter_flights(FLIGHTS, start_date, end_date, destinations, airlines)
+    ...</pre>
+  <p>
+    فیلتر کردن و محاسبهٔ اعداد در توابع ساده و جداگانه (<code>filter_flights</code> و
+    <code>compute_kpis</code>) نوشته شده‌اند تا بتوان آن‌ها را بدون اجرای سرور هم آزمایش کرد
+    (بخش ۷). حالت‌های خاص هم در نظر گرفته شده‌اند: اگر هیچ پروازی با فیلترها جور نباشد، کارت‌ها «–»
+    و نمودارها پیام «هیچ پروازی پیدا نشد» نشان می‌دهند و برنامه خطا نمی‌دهد.
+  </p>
+
+  <h3>تصمیم‌های طراحی نمودارها</h3>
+  <ul>
+    <li><b>دو قاب به‌جای دو محور:</b> تعداد پرواز (حدود ۱۰۰۰) و تأخیر (حدود ۱۰ دقیقه) مقیاس‌های بسیار متفاوتی دارند. اگر روی یک نمودار با دو محور عمودی رسم شوند، هم‌ترازی دو محور دلخواه است و ممکن است ارتباطی را نشان دهد که در داده وجود ندارد.</li>
+    <li><b>مقیاس لگاریتمی در نمودار پراکندگی:</b> تعداد پرواز مقصدها از ۱ تا بیش از ۱۷٬۰۰۰ است؛ روی محور معمولی تقریباً همهٔ نقطه‌ها به لبهٔ چپ می‌چسبیدند.</li>
+    <li><b>شمارش هیستوگرام در <span class="latin">pandas</span>:</b> به‌جای فرستادن حدود ۳۲۷٬۰۰۰ عدد خام به مرورگر، تأخیرها در پایتون در بازه‌های ۵ دقیقه‌ای شمرده می‌شوند و فقط حدود ۸۰ ستون فرستاده می‌شود. تأخیرهای بیش از ۳۰۰ دقیقه (۶۱۱ پرواز) نمایش داده نمی‌شوند و تعدادشان زیر نمودار نوشته شده است.</li>
+    <li><b>برچسب‌گذاری گزیده:</b> در نمودار پراکندگی فقط پرترددترین، دیرترین و زودترین مقصد برچسب دارند؛ جزئیات بقیه با بردن ماوس روی نقطه دیده می‌شود.</li>
+    <li><b>رنگ‌ها:</b> رنگ‌های نمودارها برای افراد دارای کوررنگی و برای کنتراست با پس‌زمینهٔ تیره با یک ابزار بررسی شدند.</li>
+    <li><b>پوستهٔ تیره:</b> در فایل <code>style.css</code> تعریف شده است. <span class="latin">Dash</span> نسخهٔ ۴ برای رنگ منوهای کشویی و تقویم از «متغیرهای <span class="latin">CSS</span>» استفاده می‌کند و با بازتعریف این متغیرها، آن‌ها هم تیره شدند.</li>
+  </ul>
+
+  <h3>سرعت</h3>
+  <p>
+    کندترین حالت (بدون هیچ فیلتری، یعنی همهٔ ۳۳۶٬۷۷۶ پرواز) حدود ۰٫۱ ثانیه طول می‌کشد. دلیل این سرعت:
+    خواندن فایل <span class="latin">Parquet</span> به‌جای <span class="latin">CSV</span>، بارگذاری یک‌باره،
+    و انجام همهٔ محاسبات در <span class="latin">pandas</span>.
+  </p>
+</section>
+
+<!-- ============================ 7 ============================ -->
+<section class="continue">
+  <h2>۷. آزمون و اطمینان از درستی اعداد</h2>
+  <p>
+    یک داشبورد فقط وقتی ارزش دارد که اعدادش درست باشند. برای همین برنامهٔ
+    <code>check_numbers.py</code> نوشته شد. این برنامه برای چند حالت فیلتر، چهار عدد اصلی (تعداد پرواز،
+    میانگین تأخیر، درصد دیررس و درصد لغو) را <b>از دو راه کاملاً جدا</b> حساب می‌کند و مقایسه می‌کند:
+  </p>
+  <ol>
+    <li>با همان توابعی که داشبورد استفاده می‌کند، روی دادهٔ تمیز؛</li>
+    <li>با <span class="latin">pandas</span> ساده، مستقیماً روی فایل خام <span class="latin">CSV</span> و بدون هیچ‌یک از کدهای ما.</li>
+  </ol>
+  <table>
+    <tr><th>حالت آزمون</th><th>تعداد پرواز</th><th>میانگین تأخیر</th><th>درصد دیررس</th><th>درصد لغو</th><th>نتیجه</th></tr>
+    <tr><td>کل سال</td><td>۳۳۶٬۷۷۶</td><td>۶٫۹۰</td><td>۲۳٫۷۱</td><td>۲٫۴۵</td><td>قبول</td></tr>
+    <tr><td>ژوئیه، فقط <span class="latin">United</span></td><td>۵٬۰۶۶</td><td>۱۰٫۶۸</td><td>۲۷٫۱۴</td><td>۱٫۳۰</td><td>قبول</td></tr>
+    <tr><td><span class="latin">ATL</span> یا <span class="latin">ORD</span> با <span class="latin">Delta</span> یا <span class="latin">American</span></td><td>۱۶٬۶۳۰</td><td>۴٫۵۱</td><td>۱۹٫۷۸</td><td>۱٫۶۸</td><td>قبول</td></tr>
+    <tr><td>فقط ۸ فوریه</td><td>۹۳۰</td><td>۲۴٫۲۳</td><td>۴۷٫۲۵</td><td>۵۰٫۷۵</td><td>قبول</td></tr>
+  </table>
+  <p>
+    هر ۱۶ مقایسه یکسان بودند. برای اطمینان از اینکه خود آزمون هم درست کار می‌کند، یک بار عمداً اعداد
+    ژوئیه با دادهٔ اوت مقایسه شد و آزمون، همان‌طور که انتظار می‌رفت، «رد» اعلام کرد. آزمونی که
+    هیچ‌وقت رد نشود، چیزی را ثابت نمی‌کند.
+  </p>
+  <p>
+    در مرحلهٔ ساخت، ۱۱ ترکیب فیلتر دیگر هم آزمایش شد؛ از جمله یک روز تنها، روز آخر سال (برای اطمینان از
+    اینکه تاریخ پایان هم شمرده می‌شود)، فیلترهای خالی، مقصدی که تنها پروازش لغو شده بود و فیلتری که
+    هیچ پروازی را برنمی‌گرداند. همچنین بررسی شد که دادهٔ نمودارها با هم جور باشد: مجموع پروازهای
+    روزانه برابر کل پروازها، و مجموع ستون‌های هیستوگرام به‌علاوهٔ پروازهای خارج از بازه برابر تعداد
+    پروازهای رسیده.
+  </p>
+
+  <h3>اشکال‌هایی که با آزمون پیدا و رفع شدند</h3>
+  <ul>
+    <li>ستون <code>is_delayed</code> ابتدا ترکیبی نامرتب از درست/نادرست/خالی بود و به نوع مناسب <code>boolean</code> تبدیل شد.</li>
+    <li>در تصویر داشبورد دیده شد که برچسب‌های مقصدهای پرتردد روی هم افتاده‌اند و برچسب یک شرکت با نام شرکت‌ها برخورد دارد؛ هر دو اصلاح شدند.</li>
+    <li>یک قاعدهٔ <span class="latin">CSS</span> ناخواسته چیدمان گزینه‌های منوی کشویی را به هم ریخته بود.</li>
+    <li>عددی که ابتدا برای کاهش پروازهای شنبه گفته شده بود (حدود ۲۵٪) دوباره محاسبه شد و مقدار درست ۲۲٫۷٪ بود.</li>
+  </ul>
+</section>
+
+<!-- ============================ 8 ============================ -->
+<section class="continue">
+  <h2>۸. یافته‌های اصلی</h2>
+  <ol class="findings">
+    <li><b>تابستان و دسامبر بدترین زمان پروازند.</b> ژوئیه هم پرترددترین ماه است (۲۹٬۴۲۵ پرواز) و هم بیشترین تأخیر را دارد: به‌طور میانگین ۱۶٫۷ دقیقه دیرتر و ۳۱٫۵٪ پروازها دیررس. سپتامبر بهترین ماه است و پروازها به‌طور میانگین ۴ دقیقه <b>زودتر</b> رسیده‌اند.</li>
+    <li><b>«میانگین» می‌تواند گمراه‌کننده باشد.</b> پرواز معمولی (میانه) ۵ دقیقه <b>زودتر</b> می‌رسد و ۵۹٪ پروازها زودتر یا دقیقاً سر وقت می‌رسند؛ ولی میانگین ۶٫۹ دقیقه <b>دیرتر</b> است، چون تعداد کمی تأخیر بسیار طولانی (تا ۱۲۷۲ دقیقه، یعنی حدود ۲۱ ساعت) میانگین را بالا می‌کشند. به این حالت «توزیع چوله» می‌گویند.</li>
+    <li><b>شرکت‌ها تفاوت زیادی دارند.</b> <span class="latin">American</span> و <span class="latin">Delta</span> کمترین و <span class="latin">AirTran</span> و <span class="latin">ExpressJet</span> بیشترین تأخیر را دارند. <span class="latin">ExpressJet</span> همچنین ۵٫۲٪ پروازهایش را لغو کرده است.</li>
+    <li><b>هفته ریتم دارد.</b> شنبه‌ها حدود ۲۲٫۷٪ پرواز کمتری نسبت به میانگین روزهای کاری دارند و تنها روزی است که پروازها به‌طور میانگین زودتر می‌رسند (۱٫۴ دقیقه). پنجشنبه بدترین روز است (۱۱٫۷ دقیقه تأخیر).</li>
+    <li><b>یک روز بد می‌تواند بسیار شدید باشد.</b> در ۸ فوریهٔ ۲۰۱۳، روز یک کولاک بزرگ، ۵۰٫۸٪ پروازها لغو شدند؛ در حالی که این عدد برای کل سال ۲٫۵٪ است. برای دیدن آن کافی است بازهٔ تاریخ را فقط روی همان روز بگذارید و کارت «پروازهای لغوشده» را ببینید.</li>
+  </ol>
+
+  <section class="continue">
+    <h2>۹. نصب و اجرا</h2>
+    <p>به پایتون نسخهٔ ۳٫۱۱ یا بالاتر نیاز است. دادهٔ تمیز همراه پروژه است، پس داشبورد بلافاصله پس از نصب اجرا می‌شود:</p>
+<pre>python3 -m venv .venv
+source .venv/bin/activate          <span class="c"># Windows: .venv\Scripts\activate</span>
+pip install -r requirements.txt
+python src/app.py                  <span class="c"># then open http://127.0.0.1:8050</span>
+
+python src/analysis.py             <span class="c"># optional: findings report</span>
+python src/data_prep.py            <span class="c"># optional, needs data/flights.csv</span>
+python src/check_numbers.py        <span class="c"># optional, needs data/flights.csv</span></pre>
+  </section>
+</section>
+
+<!-- ============================ 10 + 11 ============================ -->
+<section class="continue">
+  <h2>۱۰. محدودیت‌ها و ایده‌های آینده</h2>
+  <ul>
+    <li><b>دامنهٔ داده:</b> فقط پروازهای خروجی از نیویورک در یک سال (۲۰۱۳) بررسی شده‌اند؛ نتایج را نمی‌توان به همهٔ فرودگاه‌ها یا سال‌های دیگر تعمیم داد.</li>
+    <li><b>نقشه:</b> با افزودن جدول مختصات فرودگاه‌ها می‌توان نمودار سوم را به نقشهٔ جغرافیایی تبدیل کرد.</li>
+    <li><b>علت تأخیر:</b> این داده علت تأخیر را ندارد. ترکیب آن با دادهٔ آب‌وهوا می‌تواند نشان دهد چه سهمی از تأخیرها به هوا مربوط است.</li>
+    <li><b>میانه در کنار میانگین:</b> چون توزیع تأخیر چوله است، افزودن کارت «میانهٔ تأخیر» تصویر کامل‌تری می‌دهد.</li>
+    <li><b>زمان رسیدن:</b> برای ساختن تاریخ و زمان دقیق رسیدن باید منطقهٔ زمانی هر فرودگاه مقصد را داشت.</li>
+  </ul>
+
+  <h2 style="margin-top:26px">۱۱. واژه‌نامه</h2>
+  <table>
+    <tr><th style="width:26%">واژه</th><th>معنی</th></tr>
+    <tr><td><span class="latin">DataFrame</span></td><td>جدول داده در <span class="latin">pandas</span>؛ ردیف‌ها و ستون‌ها، مثل یک صفحه‌گسترده</td></tr>
+    <tr><td>محیط مجازی (<span class="latin">venv</span>)</td><td>پوشه‌ای جدا برای کتابخانه‌های یک پروژه، تا با پروژه‌های دیگر قاطی نشود</td></tr>
+    <tr><td><span class="latin">Parquet</span></td><td>قالب فایل فشرده و ستونی برای جدول‌ها؛ کوچک‌تر و بسیار سریع‌تر از <span class="latin">CSV</span></td></tr>
+    <tr><td>کال‌بک (<span class="latin">callback</span>)</td><td>تابعی که <span class="latin">Dash</span> هنگام تغییر یک ورودی (مثلاً فیلتر) خودکار اجرا می‌کند</td></tr>
+    <tr><td>شاخص کلیدی (<span class="latin">KPI</span>)</td><td>عدد اصلی که وضعیت را خلاصه می‌کند، مثل درصد پروازهای دیررس</td></tr>
+    <tr><td>میانه</td><td>عدد وسط وقتی همهٔ مقادیر مرتب شوند؛ برخلاف میانگین، تحت تأثیر چند عدد بسیار بزرگ قرار نمی‌گیرد</td></tr>
+    <tr><td>توزیع چوله</td><td>توزیعی که یک طرفش دنبالهٔ بلندی دارد (اینجا: چند تأخیر بسیار طولانی)</td></tr>
+    <tr><td>مقیاس لگاریتمی</td><td>محوری که هر گام آن ده برابر گام قبل است (۱، ۱۰، ۱۰۰، ۱۰۰۰)</td></tr>
+    <tr><td><span class="latin">groupby</span></td><td>گروه‌بندی ردیف‌ها بر اساس یک ستون و محاسبهٔ خلاصه برای هر گروه</td></tr>
+    <tr><td><span class="latin">git</span> / <span class="latin">commit</span></td><td>ابزار ثبت تاریخچهٔ تغییرات کد / یک نقطهٔ ثبت‌شده در این تاریخچه</td></tr>
+  </table>
+</section>
+
+</body>
+</html>

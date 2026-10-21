@@ -5,7 +5,10 @@
 __pycache__/
 *.pyc
 
-# Large data files: too big for git, and the cleaned file can be rebuilt
-# any time by running src/data_prep.py
+# The raw CSV is too big for git (43 MB) and is never changed.
 data/*.csv
+
+# Parquet files are ignored too, EXCEPT the cleaned data (11 MB): it is
+# included so the dashboard runs right after cloning, without the raw CSV.
 data/*.parquet
+!data/clean_flights.parquet
