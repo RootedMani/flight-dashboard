@@ -60,15 +60,28 @@ def compare_airlines(df):
     return airlines.sort_values("flights", ascending=False)
 
 
-def top_destinations(df, n=10):
-    """The n destinations with the most flights, and how late they arrive."""
+def flights_per_day(df):
+    """Number of flights and average arrival delay for every calendar day."""
+    return df.groupby("flight_date").agg(
+        flights=("id", "count"),
+        avg_arr_delay=("arr_delay", "mean"),
+    )
+
+
+def destination_summary(df):
+    """Number of flights and delay numbers for every destination, busiest first."""
     destinations = df.groupby("dest", observed=True).agg(
         flights=("id", "count"),
         avg_arr_delay=("arr_delay", "mean"),
         pct_delayed=("is_delayed", "mean"),
     )
     destinations["pct_delayed"] *= 100
-    return destinations.sort_values("flights", ascending=False).head(n)
+    return destinations.sort_values("flights", ascending=False)
+
+
+def top_destinations(df, n=10):
+    """The n destinations with the most flights, and how late they arrive."""
+    return destination_summary(df).head(n)
 
 
 def print_findings(df):

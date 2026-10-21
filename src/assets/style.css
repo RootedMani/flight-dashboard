@@ -1,0 +1,130 @@
+/* Dark theme for the dashboard. Dash loads this file automatically
+   because it is inside the "assets" folder next to app.py. */
+
+:root {
+  --page: #0d0d0d;       /* page background */
+  --surface: #1a1a19;    /* card background */
+  --border: rgba(255, 255, 255, 0.10);
+  --text: #f0efec;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --accent: #3987e5;
+
+  /* Dash 4's dropdown and date picker read these variables,
+     so overriding them turns those components dark too. */
+  --Dash-Fill-Inverse-Strong: var(--surface);
+  --Dash-Fill-Interactive-Strong: var(--accent);
+  --Dash-Fill-Interactive-Weak: rgba(255, 255, 255, 0.04);
+  --Dash-Fill-Primary-Hover: rgba(255, 255, 255, 0.06);
+  --Dash-Fill-Primary-Active: rgba(255, 255, 255, 0.10);
+  --Dash-Fill-Disabled: rgba(255, 255, 255, 0.06);
+  --Dash-Text-Strong: var(--text);
+  --Dash-Text-Primary: var(--text);
+  --Dash-Text-Weak: var(--text-secondary);
+  --Dash-Text-Disabled: var(--text-muted);
+  --Dash-Stroke-Strong: rgba(255, 255, 255, 0.30);
+  --Dash-Stroke-Weak: var(--border);
+  --Dash-Shading-Strong: rgba(0, 0, 0, 0.6);
+  --Dash-Shading-Weak: rgba(0, 0, 0, 0.4);
+  --Dash-Tooltip-Background-Color: #2c2c2a;
+  --Dash-Tooltip-Border-Color: var(--border);
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px 40px;
+}
+
+.header h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.header p {
+  margin: 0 0 16px;
+  color: var(--text-secondary);
+}
+
+/* Every box on the page is a "card". */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 0; /* lets charts shrink inside the grid instead of overflowing */
+}
+
+/* Filters: three side by side. */
+.filters {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* ">" = only our own titles, not the <label>s inside Dash's dropdown list. */
+.filter > label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* KPI cards: four in a row. */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.kpi {
+  padding: 16px;
+}
+
+.kpi-title {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.kpi-value {
+  margin: 4px 0;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.kpi-note {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Charts: two columns; "wide" charts take the whole row. */
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+/* Small screens: stack everything in one column. */
+@media (max-width: 900px) {
+  .filters,
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
