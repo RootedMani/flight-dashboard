@@ -46,7 +46,10 @@ FONT = 'system-ui, -apple-system, "Segoe UI", sans-serif'
 # Load the data once, at startup (never inside a callback - that would be slow)
 # ---------------------------------------------------------------------------
 
-FLIGHTS = load_clean_data()
+# Only the columns the dashboard uses. Loading all 29 columns would need about
+# 150 MB more memory, which matters on small free hosting plans (512 MB).
+APP_COLUMNS = ["id", "flight_date", "dest", "airline", "arr_delay", "is_delayed", "cancelled"]
+FLIGHTS = load_clean_data(columns=APP_COLUMNS)
 FIRST_DATE = FLIGHTS["flight_date"].min()
 LAST_DATE = FLIGHTS["flight_date"].max()
 
@@ -279,6 +282,10 @@ def chart_card(graph_id, wide=False):
 # assets_folder: Dash automatically loads every .css file in this folder.
 app = Dash(__name__, title="Flight Delays Dashboard",
            assets_folder=str(Path(__file__).parent / "assets"))
+
+# The web server inside Dash. Online hosting runs it with gunicorn
+# (a production web server) instead of app.run(): see the Dockerfile.
+server = app.server
 
 app.layout = html.Div(className="page", children=[
     html.Header(className="header", children=[

@@ -54,6 +54,18 @@ python src/data_prep.py
 
 Then open **http://127.0.0.1:8050** in your browser. Press `Ctrl+C` in the terminal to stop the app.
 
+## Online version
+
+The dashboard can run online for free on [Render](https://render.com):
+
+1. Sign in to render.com with your GitHub account.
+2. Click **New → Blueprint**, choose this repository, and click **Apply**. Render reads `render.yaml` and builds the app from the `Dockerfile`. This takes a few minutes.
+3. Open the `https://….onrender.com` address that Render shows.
+
+On the free plan the app goes to sleep after 15 minutes without visitors. The first visit after that takes about a minute while it wakes up. Every `git push` redeploys the app automatically.
+
+The free plan has 512 MB of memory, so `app.py` only loads the 7 columns it needs. That brings peak memory down from about 450 MB to under 300 MB.
+
 ## Project files
 
 | File | What it does |
@@ -67,6 +79,8 @@ Then open **http://127.0.0.1:8050** in your browser. Press `Ctrl+C` in the termi
 | `src/assets/style.css` | The dark theme. Dash loads every CSS file in `assets/` automatically. |
 | `docs/` | The dashboard screenshot and the Persian technical document (PDF, its HTML source, and the Vazirmatn font). |
 | `requirements.txt` | The list of libraries (with exact versions) the project needs. |
+| `Dockerfile` | Recipe for running the app online: installs Python and the libraries, then starts the app with gunicorn (a production web server). |
+| `render.yaml` | Tells render.com how to host the app (free plan, built from the Dockerfile). |
 
 ## Decisions about the data
 

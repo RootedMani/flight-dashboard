@@ -18,9 +18,13 @@ PROJECT_DIR = Path(__file__).resolve().parent.parent
 CLEAN_PARQUET = PROJECT_DIR / "data" / "clean_flights.parquet"
 
 
-def load_clean_data(path=CLEAN_PARQUET):
-    """Load the cleaned flights produced by data_prep.py."""
-    return pd.read_parquet(path)
+def load_clean_data(path=CLEAN_PARQUET, columns=None):
+    """Load the cleaned flights produced by data_prep.py.
+
+    columns: optional list of column names to load (None = all of them).
+    Loading fewer columns uses much less memory.
+    """
+    return pd.read_parquet(path, columns=columns)
 
 
 def flights_per_month(df):

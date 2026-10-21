@@ -1,0 +1,9 @@
+# Render "Blueprint": tells render.com how to run this project online.
+# On render.com: New -> Blueprint -> choose this GitHub repo.
+services:
+  - type: web
+    name: flight-dashboard
+    runtime: docker          # build with the Dockerfile in this folder
+    plan: free
+    healthCheckPath: /
+    autoDeploy: true         # redeploy automatically after every git push

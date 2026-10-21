@@ -4,3 +4,4 @@ dash==4.4.1        # the web dashboard framework
 plotly==7.1.0      # interactive charts (Dash draws its charts with Plotly)
 pandas==3.0.6      # loading, cleaning and summarising the table of flights
 pyarrow==26.0.0    # lets pandas read/write fast .parquet files
+gunicorn==26.2.0   # production web server, used only for the online version (Linux)
