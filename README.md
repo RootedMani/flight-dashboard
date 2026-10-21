@@ -57,6 +57,7 @@ Then open **http://127.0.0.1:8050** in your browser. Press `Ctrl+C` in the termi
 | `src/data_prep.py` | Cleans the data: flags cancelled/diverted flights, handles missing values, builds real date/time columns, and adds day of week and delay category. Prints a report of what changed. |
 | `src/analysis.py` | Small functions that each answer one question (flights per month, delay distribution, airline comparison, top destinations). Prints the key findings. The dashboard reuses these functions. |
 | `src/app.py` | The Dash dashboard: the page layout, the filters, and one callback that filters the data and redraws everything. |
+| `src/check_numbers.py` | Checks that the dashboard's KPI numbers match numbers calculated directly from the raw CSV. Prints PASS/FAIL. |
 | `src/assets/style.css` | The dark theme. Dash loads every CSS file in `assets/` automatically. |
 | `requirements.txt` | The list of libraries (with exact versions) the project needs. |
 
@@ -88,6 +89,18 @@ Then open **http://127.0.0.1:8050** in your browser. Press `Ctrl+C` in the termi
 5. **One bad day can be extreme.** On 8 February 2013, the day of a big snowstorm (the media called it "Nemo"), **50.8% of flights were cancelled**, compared with 2.5% over the whole year. To see it, set the date range to just that day and look at the "Cancelled flights" card. The "flights per day" chart does *not* show a dip, because it counts scheduled flights, including cancelled ones.
 
 ## How the numbers were checked
+
+You can rerun the main check yourself:
+
+```bash
+python src/check_numbers.py
+```
+
+- It takes 4 filter cases: the whole year, July with United only, ATL/ORD on Delta/American, and 8 February only.
+- For each case it calculates total flights, average arrival delay, % delayed and % cancelled in two separate ways: with the dashboard's own functions, and with plain pandas on the raw CSV.
+- It prints PASS or FAIL for each number and ends with "All checks passed." if everything agrees.
+
+During development, a longer version of this check was also run:
 
 - For 11 filter combinations, the dashboard's numbers were compared with numbers recomputed directly from the raw CSV with pandas. The combinations included a single day, several destinations with several airlines, a destination with only one (cancelled) flight, and filters that match nothing. All of them matched.
 - The chart data also adds up: daily flight counts, histogram bins and airline averages all agree with the raw data.
